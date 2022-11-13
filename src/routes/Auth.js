@@ -44,9 +44,6 @@ const Auth = () => {
                 setError(error.message)
             }
         }
-        // else {
-        //     // log in
-        // }
     }
 
     const toggleAccount = () => setNewAccount((prev) => !prev);
