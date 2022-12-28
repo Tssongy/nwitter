@@ -14,7 +14,7 @@ const Home = () => {
                 ...doc.data(),
                 id:doc.id
             }
-            console.log(doc.data())
+            console.log("doc data: ", doc.data())
             setNweets(prev => [nweetObj, ...prev])
         })
     }
