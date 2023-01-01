@@ -9,6 +9,7 @@ function App() {
   const auth = getAuth();
   const [init, setInit] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userObj, setUserObj] = useState(null);
 
   // setInterval(() => {
   //   console.log(auth.currentUser)
@@ -20,6 +21,7 @@ function App() {
         setIsLoggedIn(true)
         console.log("user: ", user)
         const uid = user.uid;
+        setUserObj(user);
       }
       else {
         setIsLoggedIn(false);
@@ -30,7 +32,7 @@ function App() {
 
   return (
     <>
-      {init ? <AppRouter isLoggedIn={isLoggedIn}/> : "Initializing"}
+      {init ? <AppRouter isLoggedIn={isLoggedIn} userObj={userObj}/> : "Initializing"}
       <footer>&copy; {new Date().getFullYear()} Nwitter</footer>
     </>
   );

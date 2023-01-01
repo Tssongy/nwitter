@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { dbService } from "../fbase";
-import { collection, addDoc, getDocs, query } from "firebase/firestore";
+import Nweet from "../components/Nweet";
+import { collection, addDoc, getDocs, query, orderBy, onSnapshot } from "firebase/firestore";
 
-const Home = () => {
+const Home = ({ userObj }) => {
     const [nweet, setNweet] = useState("");
     const [nweets, setNweets] = useState([]);
     
@@ -22,8 +23,9 @@ const Home = () => {
     const onSubmit = async (event) => {
         event.preventDefault();
         await addDoc(collection(dbService, "nweets"), {
-            nweet,
+            text: nweet,
             createdAt: Date.now(),
+            creatorId: userObj.uid
         });
         setNweet("");
     };
@@ -35,7 +37,17 @@ const Home = () => {
     }
 
     useEffect(() => {
-        getNweets();
+        const q = query(
+                collection(dbService, "nweets"),
+                orderBy("createdAt", "desc")
+        );
+        onSnapshot(q, (snapshot) => {
+            const nweetArr = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            setNweets(nweetArr);
+        });
     }, [])
 
     return (
@@ -46,9 +58,7 @@ const Home = () => {
             </form>
             <div>
                 {nweets.map((nweet) => 
-                    <div>
-                        <h4>{nweet.nweet}</h4>
-                    </div>
+                    <Nweet key={nweet.id} nweetObj={nweet} isOwner={nweet.creatorId === userObj.uid} />
                 )}
             </div>
         </div>
