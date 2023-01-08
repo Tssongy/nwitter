@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { dbService } from "../fbase";
 import Nweet from "../components/Nweet";
+import { v4 as uuidv4} from "uuid";
 import { collection, addDoc, getDocs, query, orderBy, onSnapshot } from "firebase/firestore";
+import { ref, uploadString, getDownloadURL } from "@firebase/storage";
+import { storageService } from "../fbase";
 
 const Home = ({ userObj }) => {
     const [nweet, setNweet] = useState("");
     const [nweets, setNweets] = useState([]);
-    const [attachment, setAttachment] = useState();
+    const [attachment, setAttachment] = useState("");
     
     const getNweets = async () => {
         const q = query(collection(dbService, "nweets"));
@@ -23,12 +26,24 @@ const Home = ({ userObj }) => {
 
     const onSubmit = async (event) => {
         event.preventDefault();
+        let attachmentUrl = "";
+        if(attachment !== ""){
+            //create image folder
+            const fileRef = ref(storageService, `${userObj.uid}/${uuidv4()}`);
+            //upload file
+            const response = await uploadString(fileRef, attachment, "data_url");
+            // get file url
+            attachmentUrl = await getDownloadURL(response.ref);
+        }
+        
         await addDoc(collection(dbService, "nweets"), {
             text: nweet,
             createdAt: Date.now(),
-            creatorId: userObj.uid
+            creatorId: userObj.uid,
+            attachmentUrl
         });
         setNweet("");
+        setAttachment("");
     };
 
     const onChange = (event) => {
@@ -60,7 +75,7 @@ const Home = ({ userObj }) => {
         }
         reader.readAsDataURL(theFile);
     };
-    const onClearAttachment = () => setAttachment(null);
+    const onClearAttachment = () => setAttachment("");
     return (
         <div>
             <form onSubmit={onSubmit}>
